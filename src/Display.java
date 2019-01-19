@@ -415,7 +415,7 @@ public class Display extends JComponent implements KeyListener
   {
     Display display = new Display(1);
 //    Display display3D = new Display(1);
-    
+
 //    Color c = new Color(0, 115, 230);
 //    double h = 2.5;
 //    display.add(new Wall(new Point(390,210), new Point(390,270), h, 1, c));
