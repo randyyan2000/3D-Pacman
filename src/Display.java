@@ -5,8 +5,6 @@ import java.io.*;
 import java.net.*;
 import javax.imageio.*;
 import java.util.*;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Display extends JComponent implements KeyListener
 {

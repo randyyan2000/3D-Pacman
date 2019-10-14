@@ -3,19 +3,19 @@ public class Ghost extends MobilePoint
   private String image;
   private int direction;
   private boolean vulnerable;
-  
+
   public static final int UP=0;
   public static final int RIGHT=1;
   public static final int DOWN=2;
   public static final int LEFT=3;
-  
+
   public Ghost(double x, double y, String i)
   {
     super(x,y);
     image = i;
     vulnerable = false;
   }
-  
+
   public String getImage()
   {
     String i = image;
@@ -27,7 +27,7 @@ public class Ghost extends MobilePoint
       image = image.substring(0,image.length()-1)+"0";
     return i;
   }
-  
+
   public boolean onCross()
   {
     double dx = getX();
@@ -37,7 +37,7 @@ public class Ghost extends MobilePoint
       if(dx>450 || dx<110)
         setY(170);
     }
-    
+
     if(getY()<10)
       setY(30);
     else if(getY()>610)
@@ -48,7 +48,7 @@ public class Ghost extends MobilePoint
       setX(30);
     int x = (int)Math.round(getX());
     int y = (int)Math.round(getY());
-    
+
     if(x==250 && y==290)
     {
       setDirection(1);
@@ -67,7 +67,7 @@ public class Ghost extends MobilePoint
     }
     return false;
   }
-  
+
   public void setDirection(int i)
   {
     direction = i;
@@ -82,10 +82,10 @@ public class Ghost extends MobilePoint
     else if(direction == LEFT)
       setVX(-Display.GSPEED);
   }
-  
+
   public int getDirection()
   {return direction;}
-  
+
   public void switchDirection()
   {
     direction= direction+2;
@@ -95,7 +95,7 @@ public class Ghost extends MobilePoint
       direction = 1;
     setDirection(direction);
   }
-  
+
   public static int switchDirection(int d)
   {
     d+=2;
@@ -105,14 +105,13 @@ public class Ghost extends MobilePoint
       d = 1;
     return d;
   }
-  
+
   public void setImage(String i)
   {image=i;}
-  
+
   public void setVulnerable(boolean v)
   {vulnerable = v;}
-  
+
   public boolean isVulnerable()
   {return vulnerable;}
-  
 }
