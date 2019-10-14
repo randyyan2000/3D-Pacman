@@ -100,6 +100,7 @@ public class Wall implements Shape
     return min;
   }
   
+  @Override
   public Point center()
   {
     return new Point(((a.getX()+b.getX())/2),((a.getY()+b.getY())/2),height/2);

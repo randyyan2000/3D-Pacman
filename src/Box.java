@@ -3,11 +3,9 @@ public class Box
   private Point a;
   private Point b;
   
-  public Box(Point ayy, Point be)
+  public Box(Point ay, Point be)
   {
-    a=ayy;
+    a=ay;
     b=be;
   }
-  
-  
 }
