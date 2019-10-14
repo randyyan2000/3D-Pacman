@@ -539,7 +539,7 @@ public class Display extends JComponent implements KeyListener
         System.out.println("Play");
         int i = 0;
         displayThread.start();
-        while(alive == true)
+        while(alive)
         {
             try
             {
@@ -670,19 +670,19 @@ public class Display extends JComponent implements KeyListener
             catch(Exception e){}
         }
 
-        int select = JOptionPane.CLOSED_OPTION;
-        while(select == JOptionPane.CLOSED_OPTION)
-        {
-            select = JOptionPane.showOptionDialog(null,"Your Score: " + score+"\n Play Again?", "Game Over", 0, 3, null, new Object[] {"Maybe","Yes"}, null);
-        }
-        if(select == 1)
-        {
+        int select = JOptionPane.showOptionDialog(null,"Your Score: " + score+"\n Play Again?", "Game Over", 0, 3, null, new Object[] {"Yes","No"}, null);
+
+        if(select == 0) {
             reset(true);
             PMap.createMap(this);
             try{Thread.sleep(3000);}
             catch (InterruptedException e){System.exit(1);}
             play();
         }
+        else {
+            System.exit(0);
+        }
+
     }
 
     public void keyPressed(KeyEvent e)
