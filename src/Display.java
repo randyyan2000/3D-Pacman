@@ -12,9 +12,12 @@ public class Display extends JComponent implements KeyListener
 {
     public ArrayList<Shape> shapes;
     public Display linkedDisplay;
-    public MobilePoint playerPoint;
-    public Point light;
-    public Double angle;
+    private MobilePoint playerPoint;
+    private Point light;
+    private Double angle;
+
+    private final boolean RIGHT_ANGLE_TURNS = true;
+
     private boolean alive;
     private boolean power;
     private long powerTime;
@@ -29,7 +32,7 @@ public class Display extends JComponent implements KeyListener
     private boolean left;
     private Integer score;
     private Font font;
-    public DisplayThread displayThread;
+    private DisplayThread displayThread;
 
     private Ghost blinky;
     private Ghost inky;
@@ -44,11 +47,13 @@ public class Display extends JComponent implements KeyListener
     private static Map<String, Image> images = new HashMap<String, Image>();
 
     public int type;
-    private final double GRAVITY = 0.0003;
-    private final double JUMPV = 0.0555;
+    //    private final double GRAVITY = 0.0003;
+//    private final double JUMPV = 0.0555;
+    private final int TYPE2D = 0;
+    private final int TYPE3D = 1;
     private final int VCONST = 3000;
     private final int HCONST = 300;
-    //  private final double ANGLE_SPEED = Math.toRadians(0.08);
+    private final double ANGLE_SPEED = Math.toRadians(0.08);
     private final double SPEED = .08;
     private static final double PI = Math.PI;
     public static final double GSPEED = PI/100*4;
@@ -146,7 +151,7 @@ public class Display extends JComponent implements KeyListener
             g.setColor(Color.BLACK);
         g.fillRect(0, 0, getWidth(), getHeight());
 
-        if(type==1)
+        if(type == TYPE3D)
         {
             Paint p = ((Graphics2D)g).getPaint();
             ((Graphics2D)g).setPaint(new GradientPaint(getWidth()/2,getHeight()/2,new Color(102, 51, 0),getWidth()/2,getHeight(), new Color(204, 102, 0)));
@@ -164,11 +169,11 @@ public class Display extends JComponent implements KeyListener
             if(shapes.get(i) instanceof Wall)
                 drawWall(g, (Wall)s);
         }
-        if(type == 0)
+        if(type == TYPE2D)
         {
+            // Draw "Pac-Man"
             g.setColor(Color.YELLOW);
             g.fillOval(getWidth()/2-7, getHeight()/2-7, 14, 14);
-
         }
         g.setColor(Color.WHITE);
 
@@ -194,33 +199,53 @@ public class Display extends JComponent implements KeyListener
 
     public void drawWall(Graphics g, Wall w)
     {
-        if(type == 0)
+        if(type == TYPE2D)
         {
             drawLine(g, w.getOverheadLine());
         }
-        if(type == 1)
+        if(type == TYPE3D)
         {
             Point[] points = w.getPoints();
+            Line[] lines = w.getLines();
             if(onScreen(points))
             {
                 if(w.getFill() == 0)
                 {
-                    Line[] lines = w.getLines();
-                    for(int i = 0; i<lines.length; i++)
+                    for(int i = 0; i < lines.length; i++)
                     {
                         drawLine(g,lines[i]);
                     }
                 }
-                if(w.getFill() == 1)
+                else if(w.getFill() == 1)
                 {
-                    ApparentPoint[] aPoints = new ApparentPoint[4];
+//                    ApparentPoint[] aPoints = new ApparentPoint[4];
                     int[] x = new int[4];
                     int[] y = new int[4];
-                    for(int i=0; i<4;i++)
+//                    ArrayList<Integer> x = new ArrayList<>();
+//                    ArrayList<Integer> y = new ArrayList<>();
+                    for(int i = 0; i < 4; i++)
                     {
-                        aPoints[i] = getApparentPoint(points[i],true);
-                        x[i]=(int)aPoints[i].getX();
-                        y[i]=(int)aPoints[i].getY();
+                        Point p = points[i];
+                        ApparentPoint a;
+                        if (!onScreen(p)) {
+                            if(onScreen(points[(i + 1) % 4]))
+                                a = getApparentPoint(p, points[(i + 1) % 4]);
+                            else
+                                a = getApparentPoint(p, points[(i + 3) % 4]);
+                        }
+                        else
+                            a = getApparentPoint(p);
+                        x[i]= (int) Math.round(a.getX());
+                        y[i]= (int) Math.round(a.getY());
+//                        Line line = lines[i];
+//                        ApparentPoint a = getApparentPoint(line.getA(), line.getB());
+//                        ApparentPoint b = getApparentPoint(line.getB(), line.getA());
+//                        x.add((int)Math.round(a.getX()));
+//                        x.add((int)Math.round(b.getX()));
+//                        y.add((int)Math.round(a.getY()));
+//                        y.add((int)Math.round(b.getY()));
+
+//                        aPoints[i] = getApparentPoint(points[i],true);
                     }
 
                     //Point light
@@ -230,18 +255,25 @@ public class Display extends JComponent implements KeyListener
                     double s = w.normal().unitV().dot((new Vector(1,2,0)).unitV());
 
                     Color c = w.getColor();
-                    int red = (int)Math.abs(c.getRed()*s);
-                    int green = (int)Math.abs(c.getGreen()*s);
-                    int blue = (int)Math.abs(c.getBlue()*s);
-                    if(red>255)
-                        red=255;
-                    if(green>255)
-                        green=255;
-                    if(blue>255)
-                        blue=255;
+                    int red = (int)Math.abs(c.getRed() * s);
+                    int green = (int)Math.abs(c.getGreen() * s);
+                    int blue = (int)Math.abs(c.getBlue() * s);
+                    if(red > 255)
+                        red = 255;
+                    if(green > 255)
+                        green = 255;
+                    if(blue > 255)
+                        blue = 255;
 
                     g.setColor(new Color(red,green,blue));
-                    g.fillPolygon(x,y,4);
+//                    Integer[] ax = new Integer[x.size()];
+//                    ax = x.toArray(ax);
+//                    Integer[] ay = new Integer[y.size()];
+//                    ay = x.toArray(ay);
+//                    System.out.println(Arrays.toString(ArrayUtils.toPrimitive(ax)));
+//                    System.out.println(Arrays.toString(ArrayUtils.toPrimitive(ay)));
+//                    g.fillPolygon(ArrayUtils.toPrimitive(ax), ArrayUtils.toPrimitive(ay), ax.length);
+                    g.fillPolygon(x, y, 4);
                     g.setColor(Color.WHITE);
                 }
             }
@@ -271,7 +303,7 @@ public class Display extends JComponent implements KeyListener
 
     public ApparentPoint drawPoint(Graphics g, Point p)
     {
-        if(type == 0)
+        if(type == TYPE2D)
         {
             ((Graphics2D)g).setStroke(new BasicStroke(10, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g.setColor(Color.WHITE);
@@ -294,7 +326,7 @@ public class Display extends JComponent implements KeyListener
             return new ApparentPoint(new Point(onHoriz+getWidth()/2-r/2.0,-toHoriz+getHeight()/2-r/2.0), r, toHoriz);
         }
 
-        if(type == 1)
+        if(type == TYPE3D)
         {
             ((Graphics2D)g).setStroke(new BasicStroke(10, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g.setColor(Color.WHITE);
@@ -330,33 +362,50 @@ public class Display extends JComponent implements KeyListener
         return null;
     }
 
-    public ApparentPoint getApparentPoint(Point p, boolean b)
+    public ApparentPoint getApparentPoint(Point p)
     {
         double toHoriz = (p.relX(playerPoint) * Math.sin(angle) - p.relY(playerPoint) * Math.cos(angle));
         double onHoriz = ((p.relX(playerPoint) * Math.cos(angle) + p.relY(playerPoint) * Math.sin(angle)));
-//    System.out.println(toHoriz);
-        if(toHoriz<0 && b)
-        {
-            double a = Math.atan2(p.relY(playerPoint),p.relX(playerPoint));
-            double x = .1*Math.cos(a);
-            double y = .1*Math.sin(a);
-//      return getApparentPoint(new Point(p.getX(),playerPoint.getY()-y,p.getZ()));
-//      return getApparentPoint(new Point(playerPoint.getX()-x,p.getY(),p.getZ()));
-            return getApparentPoint(new Point(     (playerPoint.getX()-x)*Math.abs(Math.sin(angle)) + p.getX()*Math.abs(Math.cos(angle))     ,
-                    (playerPoint.getY()-y)*Math.abs(Math.cos(angle)) + p.getY()*Math.abs(Math.sin(angle))     ,
-                    p.getZ()), false);
-        }
         int screenx = (int)(HCONST * onHoriz / toHoriz);
         int screeny = (int)(-VCONST * p.relZ(playerPoint) / toHoriz);
-//    System.out.println("("+screenx+","+screeny+")");
-
         int screenr = (int)(Math.abs(400 / toHoriz));
         return new ApparentPoint(new Point(screenx+getWidth()/2, getHeight()/2-5+screeny),screenr,(p.relX(playerPoint) * Math.sin(angle) - p.relY(playerPoint) * Math.cos(angle)));
     }
 
+    public ApparentPoint getApparentPoint(Point p1, Point p2)
+    {
+        double s = Math.sin(angle);
+        double c = Math.cos(angle);
+        double toHoriz = (p1.relX(playerPoint) * s - p1.relY(playerPoint) * c);
+        double onHoriz = ((p1.relX(playerPoint) * c + p1.relY(playerPoint) * s));
+        if(toHoriz < 0)
+        {
+            double p1X = p1.getX();
+            double p1Y = p1.getY();
+            double myX = playerPoint.getX();
+            double myY = playerPoint.getY();
+            double slope = (p2.getY() - p1Y) / (p2.getX() - p1X);
+            // an ungodly equation to find the projection of the behind point of the wall to the horizon
+            // ahh.. good old algebra
+            double newx = (myX * s + c * p1Y - slope * p1X * c - myY * c + 1) / (s - slope * c);
+            double newy = p1Y - slope * (p1X - newx);
+//            double a = Math.atan2(p.relY(playerPoint),p.relX(playerPoint));
+//            double x = .1*Math.cos(a);
+//            double y = .1*Math.sin(a);
+////      return getApparentPoint(new Point(p.getX(),playerPoint.getY()-y,p.getZ()));
+////      return getApparentPoint(new Point(playerPoint.getX()-x,p.getY(),p.getZ()));
+//            return getApparentPoint(new Point(     (playerPoint.getX()-x)*Math.abs(Math.sin(angle)) + p.getX()*Math.abs(Math.cos(angle))     ,
+//                    (playerPoint.getY()-y)*Math.abs(Math.cos(angle)) + p.getY()*Math.abs(Math.sin(angle))     ,
+//                    p.getZ()), false);
+            return getApparentPoint(new Point(newx, newy, p1.getZ()));
+        }
+        else
+            return getApparentPoint(p1);
+    }
+
     public void drawLine(Graphics g, Line l)
     {
-        if(type == 0)
+        if(type == TYPE2D)
         {
 
 //      int toHoriz = (int)(p.relX(playerPoint) * Math.sin(angle) - p.relY(playerPoint) * Math.cos(angle));
@@ -377,14 +426,15 @@ public class Display extends JComponent implements KeyListener
             {g.setColor(Color.green);}
             g.drawLine(onHoriza+getWidth()/2, -toHoriza+getHeight()/2, onHorizb+getWidth()/2, -toHorizb+getHeight()/2);
         }
-        if(type == 1)
+        if(type == TYPE3D)
         {
             g.setColor(Color.WHITE);
-            ((Graphics2D)g).setStroke(defaultStroke);
+//            ((Graphics2D)g).setStroke(defaultStroke);
+            ((Graphics2D)g).setStroke(new BasicStroke(10, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             int[]x = new int[4];
             int[]y = new int[4];
-            ApparentPoint a = getApparentPoint(l.getA(),true);
-            ApparentPoint b = getApparentPoint(l.getB(),true);
+            ApparentPoint a = getApparentPoint(l.getA(), l.getB());
+            ApparentPoint b = getApparentPoint(l.getB(), l.getA());
 
             if(onScreen(l.getA(),l.getB()))
             {
@@ -507,12 +557,14 @@ public class Display extends JComponent implements KeyListener
                 double speed = SPEED;
                 if(power)
                     speed*=1.5;
-                if(rotateRight == true)
-                {}
-//          angle += ANGLE_SPEED; //rotate right
-                if(rotateLeft == true)
-                {}
-//          angle -= ANGLE_SPEED; //rotate left
+                if(rotateRight == true) {
+                    if (!RIGHT_ANGLE_TURNS)
+                        angle += ANGLE_SPEED; //rotate right (cc)
+                }
+                if(rotateLeft == true) {
+                    if (!RIGHT_ANGLE_TURNS)
+                        angle -= ANGLE_SPEED; //rotate left (ccw)
+                }
 
                 if(forward == true)
                 {mx+=speed * Math.sin(angle); my+=-speed * Math.cos(angle);}
@@ -546,11 +598,11 @@ public class Display extends JComponent implements KeyListener
                         playerPoint.move(0,0,-0.0000003);
                     }
                 }
-                if(jump&&playerPoint.getZ()<=1)
-                {
-                    playerPoint.setVZ(JUMPV);
-                    playerPoint.setAZ(-GRAVITY);
-                }
+//                if(jump&&playerPoint.getZ()<=1)
+//                {
+//                    playerPoint.setVZ(JUMPV);
+//                    playerPoint.setAZ(-GRAVITY);
+//                }
 
                 if(i % 10 == 0)
                 {
@@ -595,9 +647,6 @@ public class Display extends JComponent implements KeyListener
 //                System.out.println("ghost on cross");
                                 g.setX(Math.round(g.getX()));
                                 g.setY(Math.round(g.getY()));
-
-                                if(g.getX() == 280)
-                                    System.out.println(Arrays.toString((checkWalls(g))));
                                 g.setDirection(pickDirection(checkWalls(g),g.getDirection()));
                             }
                         }
@@ -659,12 +708,14 @@ public class Display extends JComponent implements KeyListener
         if(k == 37)
         {
             rotateLeft = true;
-            angle-=(Math.PI/2);
+            if (RIGHT_ANGLE_TURNS)
+                angle-=(Math.PI/2);
         }
         if(k == 39)
         {
             rotateRight = true;
-            angle+=(Math.PI/2);
+            if (RIGHT_ANGLE_TURNS)
+                angle+=(Math.PI/2);
         }
         if(k == 38) // up arrow
             up = true;
@@ -690,9 +741,7 @@ public class Display extends JComponent implements KeyListener
             jump = true;
         if(k==48)
         {
-            type++;
-            if(type==2)
-                type = 0;
+            type = (type + 1) % 2;
         }
 //    
 //    repaint();
