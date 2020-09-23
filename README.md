@@ -1,6 +1,6 @@
 # 3D-Pacman
 
 ## Screenshots
-![Watch out!](/screenshots/2.png)
-![Super pellet](/screenshots/3.png)
-![Alternative 2D view](/screenshots/1.png)
+<img src="/screenshots/2.PNG" alt="Watch out!" width=400px>
+<img src="/screenshots/3.PNG" alt="Super pellet!" width=400px>
+<img src="/screenshots/1.PNG" alt="Alternative 2D view" width=400px>
